@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0d0b14">
+<meta name="description" content="Game Night — a private two-player game app.">
+<link rel="manifest" href="/manifest.json">
+<title>Game Night</title>
+<style>
+:root{--bg:#0b0910;--panel:#15111d;--panel2:#1d1726;--text:#fff8ff;--muted:#b8acbb;--accent:#ff7fbd;--accent2:#9b8cff;--line:#30283a;--good:#73e0ae}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 20% 0%,#24172d 0,#0b0910 42%,#07060a 100%);color:var(--text);font-family:Inter,system-ui,-apple-system,Segoe UI,sans-serif;min-height:100vh}
+button,input{font:inherit}button{cursor:pointer;border:0}.wrap{max-width:1100px;margin:auto;padding:24px}.screen{min-height:100vh;display:flex;align-items:center;justify-content:center}.card{background:rgba(21,17,29,.86);border:1px solid var(--line);border-radius:24px;box-shadow:0 24px 70px #0007;backdrop-filter:blur(14px)}.home{width:min(700px,100%);padding:42px;text-align:center}.logo{font-size:58px;margin-bottom:6px}.title{font-size:clamp(42px,8vw,76px);font-weight:900;letter-spacing:-3px}.subtitle{color:var(--muted);font-size:18px;line-height:1.5}.row{display:flex;gap:12px;flex-wrap:wrap}.row>*{flex:1}.btn{padding:15px 18px;border-radius:14px;background:var(--panel2);color:white;border:1px solid var(--line);transition:.2s}.btn:hover{transform:translateY(-2px);border-color:#5b4a68}.primary{background:linear-gradient(135deg,var(--accent),var(--accent2));color:white;font-weight:800}.input{width:100%;padding:15px;border-radius:14px;background:#0f0c14;border:1px solid var(--line);color:white;outline:none}.input:focus{border-color:var(--accent)}.tiny{font-size:13px;color:var(--muted)}.app{display:none}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.brand{font-weight:900;font-size:24px}.pill{padding:8px 12px;border:1px solid var(--line);border-radius:999px;color:var(--muted);font-size:13px}.grid{display:grid;grid-template-columns:1.25fr .75fr;gap:18px}.panel{padding:22px}.players{display:grid;grid-template-columns:1fr 1fr;gap:12px}.player{padding:18px;border-radius:18px;background:var(--panel2);border:1px solid var(--line)}.avatar{font-size:34px}.name{font-weight:800;margin-top:8px}.ready{color:var(--good);font-size:13px}.chat{height:430px;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding-right:5px}.msg{margin:9px 0}.msg b{font-size:13px}.bubble{display:inline-block;background:#211b2b;border:1px solid #342b3e;border-radius:13px;padding:9px 11px;max-width:90%;margin-top:3px}.mine .bubble{background:#3a2135}.system{text-align:center;color:var(--muted);font-size:12px}.chatbar{display:flex;gap:8px;margin-top:12px}.chatbar input{flex:1}.choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.choice{padding:22px;border-radius:18px;background:#18131f;color:white;border:1px solid var(--line);font-weight:700}.choice:hover{border-color:var(--accent);background:#211827}.question{font-size:clamp(25px,4vw,40px);font-weight:800;line-height:1.15;margin:22px 0}.timer{font-size:14px;color:var(--accent)}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}.stat{padding:18px;border-radius:16px;background:var(--panel2)}.stat strong{display:block;font-size:30px}.toast{position:fixed;left:50%;bottom:25px;transform:translateX(-50%);background:#fff;color:#171018;padding:12px 18px;border-radius:999px;font-weight:700;display:none;z-index:9}.hidden{display:none!important}
+@media(max-width:760px){.wrap{padding:14px}.home{padding:28px 18px}.grid{grid-template-columns:1fr}.players,.choices,.stats{grid-template-columns:1fr}.chat{height:330px}.top{align-items:flex-start}.title{letter-spacing:-2px}}
+</style>
+</head>
+<body>
+<div id="home" class="screen"><div class="card home">
+  <div class="logo">🌙</div><div class="title">Game Night</div>
+  <p class="subtitle">A private little game space for two. Play, talk, laugh, rematch. ✨</p>
+  <div style="display:grid;gap:12px;margin-top:28px">
+    <input id="name" class="input" placeholder="Your name" maxlength="20">
+    <div class="row"><button class="btn primary" onclick="createRoom()">Create private room</button><button class="btn" onclick="showJoin()">Join room</button></div>
+    <div id="joinBox" class="hidden"><input id="code" class="input" placeholder="Room code"><button class="btn primary" style="width:100%;margin-top:10px" onclick="joinRoom()">Join Game Night</button></div>
+  </div>
+  <p class="tiny" style="margin-top:22px">Built as an installable app • 2 players only • private room chat</p>
+</div></div>
+
+<div id="app" class="app"><div class="wrap">
+  <div class="top"><div class="brand">🌙 Game Night</div><div class="row" style="justify-content:flex-end"><span id="roomPill" class="pill">ROOM —</span><span id="musicPill" class="pill">🎵 Romantic</span></div></div>
+
+  <section id="lobby" class="grid">
+    <div class="card panel"><h2>Private Lobby</h2><p class="tiny">Share the room code with Dammy. Nobody else can enter while both slots are occupied.</p>
+      <div class="players" id="players"></div>
+      <hr style="border-color:var(--line);border-width:1px 0 0;margin:22px 0">
+      <div class="row"><button class="btn" onclick="toggleReady()" id="readyBtn">I'm Ready</button><button class="btn primary" onclick="startGame()">Start Game</button></div>
+      <div class="row" style="margin-top:12px"><select id="rounds" class="input" onchange="setRounds(this.value)"><option value="3">3 rounds</option><option value="5" selected>5 rounds</option><option value="7">7 rounds</option><option value="10">10 rounds</option></select>
+      <select id="music" class="input" onchange="setMusic(this.value)"><option value="romantic">💗 Romantic</option><option value="phonk">🖤 Phonk</option><option value="off">🔇 Music off</option></select></div>
+    </div>
+    <div class="card panel chat"><h3>💬 Room Chat</h3><div id="messages" class="messages"></div><div class="chatbar"><input id="chatInput" class="input" placeholder="Say something…" maxlength="300"><button class="btn primary" onclick="sendChat()">Send</button></div></div>
+  </section>
+
+  <section id="game" class="grid hidden">
+    <div class="card panel"><div class="timer">ROUND <span id="round">1</span> / <span id="total">5</span></div><div id="question" class="question"></div><div class="choices">
+      <button class="choice" onclick="answer('Absolutely')">Absolutely</button><button class="choice" onclick="answer('Probably')">Probably</button><button class="choice" onclick="answer('Maybe')">Maybe</button><button class="choice" onclick="answer('Nope')">Nope</button>
+    </div><p class="tiny" id="answerStatus">Choose an answer. Your score is updated by the server.</p></div>
+    <div class="card panel chat"><h3>💬 Chat while playing</h3><div id="messagesGame" class="messages"></div><div class="chatbar"><input id="chatInputGame" class="input" placeholder="Chat…" maxlength="300"><button class="btn primary" onclick="sendChat('game')">Send</button></div></div>
+  </section>
+
+  <section id="results" class="card panel hidden" style="max-width:850px;margin:auto"><h2>✨ Round complete</h2><div class="stats"><div class="stat"><span class="tiny">Your score</span><strong id="myScore">0</strong></div><div class="stat"><span class="tiny">Their score</span><strong id="theirScore">0</strong></div><div class="stat"><span class="tiny">Round</span><strong id="resultRound">1</strong></div></div><button class="btn primary" style="margin-top:18px;width:100%" onclick="nextRound()">Next round</button></section>
+
+  <section id="finished" class="card panel hidden" style="max-width:850px;margin:auto;text-align:center"><div style="font-size:60px">🏆</div><h1>Game Night complete!</h1><p class="subtitle">Nice one. Want another round?</p><button class="btn primary" onclick="rematch()">Rematch</button></section>
+</div></div>
+<div id="toast" class="toast"></div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket=io(); let me=null,state=null,ready=false;
+const $=id=>document.getElementById(id);
+function toast(t){$("toast").textContent=t;$("toast").style.display="block";setTimeout(()=>$("toast").style.display="none",2200)}
+function showJoin(){$("joinBox").classList.remove("hidden")}
+function createRoom(){const name=$("name").value.trim();if(!name)return toast("Enter your name first.");socket.emit("create_room",{name,avatar:"🌙"})}
+function joinRoom(){const name=$("name").value.trim(),code=$("code").value.trim();if(!name||!code)return toast("Enter your name and room code.");socket.emit("join_room",{name,code,avatar:"✨"})}
+socket.on("room_created",({code})=>{toast("Room created: "+code);enterApp()});
+socket.on("joined_room",({code})=>{toast("Joined room "+code);enterApp()});
+socket.on("error_message",toast);
+function enterApp(){$("home").style.display="none";$("app").style.display="block"}
+socket.on("state",s=>{state=s;renderState()});
+socket.on("chat_history",arr=>{arr.forEach(renderChat);syncChats()});
+socket.on("chat",m=>{renderChat(m);syncChats()});
+socket.on("round_started",d=>{show("game");hide("lobby");hide("results");hide("finished");$("round").textContent=d.round;$("total").textContent=d.totalRounds;$("question").textContent=d.question;$("answerStatus").textContent="Choose an answer.";});
+socket.on("answer_saved",d=>{$("answerStatus").textContent="Answer saved • +"+d.points+" points";toast("Answer saved ❤️")});
+socket.on("round_results",d=>{show("results");hide("game");$("resultRound").textContent=d.round;const ids=Object.keys(d.scores);const mine=d.scores[socket.id]??0;const other=ids.find(x=>x!==socket.id);$("myScore").textContent=mine;$("theirScore").textContent=other?d.scores[other]:0});
+function renderState(){if(!state)return;$("roomPill").textContent="ROOM "+state.code;$("music").value=state.music;$("musicPill").textContent=state.music==="phonk"?"🖤 Phonk":state.music==="off"?"🔇 Music off":"🎵 Romantic";$("rounds").value=state.totalRounds;renderPlayers();if(state.phase==="lobby"){show("lobby");hide("game");hide("results");hide("finished")}if(state.phase==="finished"){show("finished");hide("lobby");hide("game");hide("results")}}
+function renderPlayers(){$("players").innerHTML=state.players.map(p=>`<div class="player"><div class="avatar">${p.avatar}</div><div class="name">${esc(p.name)}</div><div class="${p.ready?'ready':'tiny'}">${p.ready?'✓ Ready':'Not ready'}</div></div>`).join("");const p=state.players.find(x=>x.id===socket.id);ready=!!p?.ready;$("readyBtn").textContent=ready?"I'm Not Ready":"I'm Ready"}
+function toggleReady(){ready=!ready;socket.emit("set_ready",ready)}
+function startGame(){socket.emit("start_game")}
+function setRounds(v){socket.emit("set_total_rounds",Number(v))}
+function setMusic(v){socket.emit("set_music",v);playTone(v==="phonk"?"phonk":"soft")}
+function answer(v){socket.emit("submit_answer",v)}
+function nextRound(){socket.emit("next_round")}
+function rematch(){socket.emit("rematch")}
+function sendChat(which){const input=which==="game"?$("chatInputGame"):$("chatInput");if(input.value.trim()){socket.emit("chat",input.value.trim());input.value=""}}
+function renderChat(m){const el=document.createElement("div");if(m.system){el.className="msg system";el.textContent=m.text}else{el.className="msg "+(m.id===socket.id?"mine":"");el.innerHTML=`<b>${esc(m.avatar||"")} ${esc(m.name)}</b><div class="bubble">${esc(m.text)}</div>`}$("messages").appendChild(el);$("messages").scrollTop=$("messages").scrollHeight}
+function syncChats(){const src=$("messages").innerHTML;$("messagesGame").innerHTML=src;$("messagesGame").scrollTop=$("messagesGame").scrollHeight}
+function show(id){$(id).classList.remove("hidden")}function hide(id){$(id).classList.add("hidden")}
+function esc(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+["chatInput","chatInputGame"].forEach(id=>$(id).addEventListener("keydown",e=>{if(e.key==="Enter")sendChat(id==="chatInputGame"?"game":"")}));
+function playTone(type){const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type=type==="phonk"?"sawtooth":"sine";o.frequency.value=type==="phonk"?110:220;g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.035,c.currentTime+.03);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.5);o.connect(g).connect(c.destination);o.start();o.stop(c.currentTime+.55)}
+if("serviceWorker"in navigator)navigator.serviceWorker.register("/sw.js").catch(()=>{});
+</script>
+</body></html>
