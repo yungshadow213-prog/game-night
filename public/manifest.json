@@ -1,0 +1,9 @@
+{
+  "name": "Game Night",
+  "short_name": "Game Night",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0b0910",
+  "theme_color": "#0d0b14",
+  "description": "Private two-player Game Night app"
+}
