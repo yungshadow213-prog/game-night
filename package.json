@@ -1,14 +1,1 @@
-{
-  "name": "game-night",
-  "version": "1.0.0",
-  "private": true,
-  "description": "Game Night - private two-player real-time game app",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.21.2",
-    "socket.io": "^4.8.1"
-  }
-}
+{"name":"game-night","version":"4.2.1","private":true,"description":"Game Night 3.0 — main build bug-fixed multiplayer app","main":"server.js","scripts":{"start":"node server.js"},"dependencies":{"express":"^4.21.2","socket.io":"^4.8.1","google-auth-library":"^9.14.1"}}
