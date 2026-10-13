@@ -1,0 +1,34 @@
+name: One-time baseline sync from Game Night 2
+on:
+  push:
+    branches: [main]
+    paths:
+      - ".github/workflows/sync-game-night-2.yml"
+permissions:
+  contents: write
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Game Night 1
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Copy application files from Game Night 2
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth 1 https://github.com/yungshadow213-prog/game-night-2.git /tmp/game-night-2
+          rsync -a --delete --exclude='.git' --exclude='gamenight-data' /tmp/game-night-2/ ./
+          rm -f .github/workflows/sync-game-night-2.yml
+          rmdir .github/workflows 2>/dev/null || true
+          rmdir .github 2>/dev/null || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+            exit 0
+          fi
+          git commit -m "Sync Game Night 1 baseline from Game Night 2"
+          git push origin HEAD:main
